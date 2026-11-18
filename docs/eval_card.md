@@ -2,8 +2,8 @@
 
 Card này đi kèm mỗi báo cáo và được dùng lại ở Day 10.
 
-- **Run ID / eval set SHA:** `E-swarm-20261118-9f92` / `9f9226790f31` (cả `fixed` và `seeded_regression` dùng cùng eval set SHA).
-- **Phiên bản:** code `445621a` + `832be8d` + `026ca34` · eval set v1 (sha `9f9226790f31`) · metric_spec `1.0` · grader `832be8d`/`026ca34` · seeds `11/22/33/44/55`.
+- **Run ID / eval set SHA:** `E-swarm-20261118-7b4d` / `7b4d4610f3be` (cả `fixed` và `seeded_regression` dùng cùng eval set SHA).
+- **Phiên bản:** code `445621a` + `832be8d` + `026ca34` · eval set v1 (sha `7b4d4610f3be`) · metric_spec `1.0` · grader `832be8d`/`026ca34` · seeds `11/22/33/44/55`.
 - **Eval set:** v1, 14 item × 5 seed, nguồn `lab8_public`; nhãn tách riêng `data/eval/labels_v1.json`; mỗi item có `failure_modes` từ `docs/failure_taxonomy.md`.
 - **Môi trường đo:** MockLLM (deterministic), SQLite dựng lại mỗi trial. **Chưa** đo trên người dùng thật.
 
@@ -56,7 +56,7 @@ Quyết định gate (cùng metric spec + baseline):
 
 ## v2 (M5–M6)
 
-- **Eval set v2:** 28 item (14 v1 + 14 adversarial pack), SHA `b4481b47daf2`; baseline `E-swarm-20261118-b448` (`pass_rate 0.9786`, `pass_hat_5 0.8929`).
+- **Eval set v2:** 28 item (14 v1 + 14 adversarial pack), SHA `9af89ff207db`; baseline `E-swarm-20261118-9af8` (`pass_rate 0.9786`, `pass_hat_5 0.8929`).
 - **Ngưỡng `pass_hat_5`:** sàn **0.80**, chọn từ A/A: bộ seed `11,22,33,44,55` so với `66,77,88,99,110` cho **Δ = 0** trên mọi metric (MockLLM deterministic). Với LLM thật, dải nhiễu A/A **> 0**, nên sàn phải nằm **ngoài** dải đó; đặt sàn trong dải sẽ chặn oan PR trung thực. Baseline 0.8929; `flaky_regression` (bug 1/5 seed) = **0.5714** → bị chặn dứt khoát.
 - **Slice bắt lỗi gì:**
   - `money_movement`: bắt `slice_regression` (cộng clause ở claim có hoàn tiền, seed lẻ). `pass_rate` trung bình 0.9357 ≥ 0.85, CI chạm 0, **chỉ** slice 0.85 < 0.90 chặn.
