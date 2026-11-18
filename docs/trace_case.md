@@ -12,7 +12,7 @@ python -m lab9.trace_case --shape fixed --claim C-002 --seed 11   # đối chứ
 
 | Trường | Nội dung |
 |---|---|
-| Trial | `seeded_regression C-002@11`, run ID `E-seeded_regression-20261118-9f92` |
+| Trial | `seeded_regression C-002@11`, run ID `E-seeded_regression-20261118-7b4d` |
 | Triệu chứng | Lab 8 grader fail: `status resolved != denied`. `refund_amount_correct=False` (ledger 20.000 vs nhãn 0). Reply nói "đã hoàn 20.000đ" trong khi đơn O-202 chỉ trễ **2 ngày** → không đủ điều kiện. |
 | Bước sai đầu tiên | **Event 3**, kind `model_override`, payload `{"delay_days": 5}`: agent lấy số ngày từ ticket ("trễ 5 ngày") thay vì `orders.delay_days = 2`. |
 | Vì sao là bước *đầu tiên* | Event 1 `handoff` và event 2 `investigator` đều đúng: investigator trả `O-202 status=delivered, delay_days=2`. Chỉ từ event 3 (override) trở đi mới sai: event 4 `quote` ra 20.000, event 6 `reply` báo 20.000. |
