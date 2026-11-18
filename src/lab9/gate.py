@@ -104,8 +104,11 @@ def integrity_check(pr: dict, base: dict, spec: dict, base_spec: dict | None = N
         graded = {m["id"] for m in spec.get("metrics") or []} & set(rows[0].keys())
         for row in rows:
             for mid in graded:
-                if row.get(mid) is None:
+                value = row.get(mid)
+                if value is None:
                     problems.append(f"{row.get('item_id')}@{row.get('seed')}: {mid} is None (grader missing)")
+                elif isinstance(value, float) and not math.isfinite(value):
+                    problems.append(f"{row.get('item_id')}@{row.get('seed')}: {mid}={value!r} is not finite")
 
     # 5) slice tags may not change per (item_id, seed) (relabel out of a slice)
     pr_tags = {(r.get("item_id"), r.get("seed")): tuple(sorted(r.get("slices") or [])) for r in rows}
