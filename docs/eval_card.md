@@ -53,3 +53,14 @@ Quyết định gate (cùng metric spec + baseline):
 - **Phạm vi pilot:** hoàn phí ship do giao trễ ≥3 ngày và bồi thường hàng hỏng đã xác minh (DMG-04, trần 150.000đ), kênh chat CSKH, trần theo từng đơn.
 - **Giới hạn / bằng chứng còn thiếu:** MockLLM không đại diện model thật; 14 item ⇒ CI rộng, chỉ bắt hồi quy lớn; judge replay trên CSV đã công khai, chưa có held-out; chưa có dữ liệu người dùng thật; bug chỉ hiện 1/3 seed không phát hiện ổn định với 5 seed (xem `docs/PRD_v1.1.md` mục 6).
 - **Khi nào tăng eval-set version:** thêm item từ trace case mới, đổi nhãn/seed, hoặc đổi metric/ngưỡng (tăng `metric_spec_version`).
+
+## v2 (M5–M6)
+
+- **Eval set v2:** 28 item (14 v1 + 14 adversarial pack), SHA `b4481b47daf2`; baseline `E-swarm-20261118-b448` (`pass_rate 0.9786`, `pass_hat_5 0.8929`).
+- **Ngưỡng `pass_hat_5`:** sàn **0.80**, chọn từ A/A: bộ seed `11,22,33,44,55` so với `66,77,88,99,110` cho **Δ = 0** trên mọi metric (MockLLM deterministic). Với LLM thật, dải nhiễu A/A **> 0**, nên sàn phải nằm **ngoài** dải đó; đặt sàn trong dải sẽ chặn oan PR trung thực. Baseline 0.8929; `flaky_regression` (bug 1/5 seed) = **0.5714** → bị chặn dứt khoát.
+- **Slice bắt lỗi gì:**
+  - `money_movement`: bắt `slice_regression` (cộng clause ở claim có hoàn tiền, seed lẻ). `pass_rate` trung bình 0.9357 ≥ 0.85, CI chạm 0, **chỉ** slice 0.85 < 0.90 chặn.
+  - `adversarial`: bắt hồi quy chỉ xuất hiện trên pack (prompt injection, stale policy, cross-principal…) để trung bình không che mất.
+  - `denial`: bắt hồi quy trên nhóm claim bị từ chối.
+- **Scorecard:** `lab9.mutation --spec config/metric_spec_v2.yaml --baseline reports/baseline_v2.json` = **3/3 regression bị chặn**, **0 false alarm** (`fixed`, `honest_refactor` merge).
+- **Giới hạn cỡ mẫu:** bug chỉ hiện ở một phần ba số seed (`rare`) **không** phát hiện ổn định với bộ 5 seed cố định — `pass_hat_5` phân biệt được bug ở 1/5 seed (như `flaky_regression`) nhưng không đủ cho bug thưa hơn; cần nhiều seed hơn, **không hạ ngưỡng** để "bắt được".
