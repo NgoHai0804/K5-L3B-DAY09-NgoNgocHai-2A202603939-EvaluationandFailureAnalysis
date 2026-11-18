@@ -44,8 +44,39 @@ def slice_check(pr: dict, base: dict, spec: dict) -> tuple[list[str], list[str]]
       - fail if below "min", or if no_significant_drop and the paired CI over the slice's items
         lies entirely below 0
     Return (blocked ids like "slice:money_movement/pass_rate", report lines)."""
-    # TODO M5
-    return [], []
+    blocked: list[str] = []
+    lines: list[str] = []
+    bs = spec.get("bootstrap", {})
+    for item in spec.get("slices") or []:
+        name, metric = item["name"], item["metric"]
+        pr_items = per_item(pr, metric, slice_name=name)
+        base_items = per_item(base, metric, slice_name=name)
+        value = round(sum(pr_items.values()) / len(pr_items), 4) if pr_items else None
+        failed = False
+        note = ""
+        if value is None:
+            failed = True
+            note = "empty slice"
+        else:
+            if "min" in item and value < item["min"]:
+                failed = True
+                note = f"< min {item['min']}"
+            if item.get("no_significant_drop"):
+                keys = sorted(set(pr_items) & set(base_items))
+                if keys:
+                    d, lo, hi = stats.paired_bootstrap(
+                        [pr_items[k] for k in keys], [base_items[k] for k in keys],
+                        n_resamples=bs.get("n_resamples", 1000), rng=bs.get("rng", 2027))
+                    note = f"Δ {d:+.3f} CI [{lo:+.3f}, {hi:+.3f}]"
+                    if hi < 0:
+                        failed = True
+        slice_id = f"slice:{name}/{metric}"
+        if failed and item.get("blocking"):
+            blocked.append(slice_id)
+        threshold = {k: item[k] for k in ("min", "no_significant_drop") if k in item}
+        verdict = "BLOCK" if failed and item.get("blocking") else ("warn" if failed else "ok")
+        lines.append(f"  {slice_id:<34} {value!s:<8} {json.dumps(threshold):<38} {note:<28} {verdict}")
+    return blocked, lines
 
 
 def check(pr: dict, base: dict, spec: dict, base_spec: dict | None = None) -> tuple[list[str], list[str]]:
